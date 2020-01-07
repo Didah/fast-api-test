@@ -23,15 +23,16 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-          name: Build Docker image
-          command: docker build -t $IMAGE_NAME .
+        name: Build Docker image
+        command: docker build -t $IMAGE_NAME .
+
       # Download and cache dependencies
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "requirements.txt" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
-
+#
 #      - run:
 #          name: install dependencies
 #          command: |
@@ -49,16 +50,9 @@ jobs:
       # other common Python testing frameworks include pytest and nose
       # https://pytest.org
       # https://nose.readthedocs.io
-#      - run:
-#          name: run tests
-#          command: |
-#            . venv/bin/activate
-#            pytest
       - run:
-          name: Start container and verify it's working
-          command: |
-            set -x
-            docker-compose up -d
+          name: run tests
+          command: docker-compose run web pytest
 
       - store_artifacts:
           path: test-reports
