@@ -5,6 +5,8 @@
 version: 2
 jobs:
   build:
+    environment:
+      IMAGE_NAME: fast-api-test
     docker:
       # specify the version you desire here
       # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
@@ -19,7 +21,10 @@ jobs:
 
     steps:
       - checkout
-
+      - setup_remote_docker
+      - run:
+          name: Build Docker image
+          command: docker build -t $IMAGE_NAME .
       # Download and cache dependencies
       - restore_cache:
           keys:
@@ -27,12 +32,12 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
-      - run:
-          name: install dependencies
-          command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            pip install -r requirements.txt
+#      - run:
+#          name: install dependencies
+#          command: |
+#            python3 -m venv venv
+#            . venv/bin/activate
+#            pip install -r requirements.txt
 
       - save_cache:
           paths:
@@ -44,11 +49,16 @@ jobs:
       # other common Python testing frameworks include pytest and nose
       # https://pytest.org
       # https://nose.readthedocs.io
+#      - run:
+#          name: run tests
+#          command: |
+#            . venv/bin/activate
+#            pytest
       - run:
-          name: run tests
+          name: Start container and verify it's working
           command: |
-            . venv/bin/activate
-            pytest
+            set -x
+            docker-compose up -d
 
       - store_artifacts:
           path: test-reports
